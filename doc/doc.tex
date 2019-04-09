@@ -1,0 +1,114 @@
+\documentclass{article}
+
+\title{CS3031 - Project 2}
+\author{Paolo Moloney - 16325409}
+
+\usepackage{listings}
+\usepackage{color}
+\usepackage{setspace}
+\usepackage{graphicx}
+
+\definecolor{Code}{rgb}{0,0,0}
+\definecolor{Decorators}{rgb}{0.5,0.5,0.5}
+\definecolor{Numbers}{rgb}{0.5,0,0}
+\definecolor{MatchingBrackets}{rgb}{0.25,0.5,0.5}
+\definecolor{Keywords}{rgb}{0,0,1}
+\definecolor{self}{rgb}{0,0,0}
+\definecolor{Strings}{rgb}{0,0.63,0}
+\definecolor{Comments}{rgb}{0,0.63,1}
+\definecolor{Backquotes}{rgb}{0,0,0}
+\definecolor{Classname}{rgb}{0,0,0}
+\definecolor{FunctionName}{rgb}{0,0,0}
+\definecolor{Operators}{rgb}{0,0,0}
+\definecolor{Background}{rgb}{0.98,0.98,0.98}
+
+\lstdefinelanguage{Python}{
+	numbers=left,
+	numberstyle=\footnotesize,
+	numbersep=1em,
+       xleftmargin=1em,
+       framextopmargin=2em,
+       framexbottommargin=2em,
+       showspaces=false,
+       showtabs=false,
+       showstringspaces=false,
+	frame=l,
+	tabsize=4,
+	% Basic
+	basicstyle=\ttfamily\small\setstretch{1},
+	backgroundcolor=\color{Background},
+	% Comments
+	commentstyle=\color{Comments}\slshape,
+	% Strings
+	stringstyle=\color{Strings},
+	morecomment=[s][\color{Strings}]{"""}{"""},
+	morecomment=[s][\color{Strings}]{'''}{'''},
+	% keywords
+	morekeywords={import,from,class,def,for,while,if,is,in,elif,else,not,and,or,print,break,continue,return,True,False,None,access,as,,del,except,exec,finally,global,import,lambda,pass,print,raise,try,assert},
+	keywordstyle={\color{Keywords}\bfseries},
+	% additional keywords
+	morekeywords={[2]@invariant,pylab,numpy,np,scipy},
+	keywordstyle={[2]\color{Decorators}\slshape},
+	emph={self},
+	emphstyle={\color{self}\slshape},
+	%
+}
+\begin{document}
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+\section{Specification}
+	The objective of this project is to implement a secure cloud storage application with the following features:
+	\begin{enumerate}
+		\item Secures all files uploaded to the cloud, such that only users in the 'Secure Cloud Storage Group' can access them.
+		\item Key management system for users.
+		\item Add and remove users from the 'Secure Cloud Storage Group'.
+	\end{enumerate}
+	\newpage
+\section{Implementation}
+	I chose to implement the application in Python, using the Google Drive API and the following modules:
+	\begin{description}
+		\item[PyDrive]
+			Wrapper library of google-api-python-client
+		\item[cryptography]
+			Provides high-level and low-level interfaces to common cryptographic algorithms
+	\end{description}
+	\subsection{Admin Mode}
+		When the \texttt{admin.py} script is run, it first searches for a symmetric key in keys/key.txt. If none is found then it generates a new key and stores it there. This key is encrypted using RSA, providing an additional layer of security. The files in the cloud are stored in a folder on Google Drive. All these files are encryptred using this symmetric key. \\
+		The admin has a number of management commands available:
+		\begin{description}
+			\item[enc]
+				Pulls all the files from the Drive and encrypts using the symmetric key in keys/key.txt, then reuploads them
+			\item[dec]
+				Similar to enc, but decrypts instead of encrypting
+			\item[lf]
+				Lists all the files in the Drive
+			\item[addu]
+				Prompts the admin to enter a username to add to the 'Secure Cloud Storage Group', then adds this username to group/ and generates a private key with RSA, storing it in group/user/privateKey.txt, used to decrypt the symmetric key
+			\item[rmvu]
+				Prompts the admin to enter a username to remove from the 'Secure Cloud Storage Group', deleting the user and the corresponding private key from group/
+			\item[lu]
+				Lists all the users in the 'Secure Cloud Storage Group'
+			\item[q]
+				Terminates the execution of the program
+		\end{description}
+	\subsection{User Mode}
+		Running \texttt{user.py} is similar to admin mode, but with less privileges. The commands available to users are:
+		\begin{description}
+			\item[lf]
+				Lists all the files in the Drive
+			\item[op]
+				Prompts the user for the filename to view, then pulls and decrypts the file and prints its contents to the console
+			\item[up]
+				Prompts the user for the path to the file to upload \emph{(Not working)}
+		\end{description}
+	\subsection{Authentication}
+		Authorization and authentication are handled by PyDrive. The credentials are found in client\_secrets.json, which is generated when setting up the Google Drive API project.
+\section{Code}
+	\subsection{admin.py}
+	\lstinputlisting[language=Python]{../admin.py}
+	\newpage
+	\subsection{user.py}
+	\lstinputlisting[language=Python]{../user.py}
+\end{document}
